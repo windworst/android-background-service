@@ -12,6 +12,5 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SystemService.start(this);
-        finish();
     }
 }

