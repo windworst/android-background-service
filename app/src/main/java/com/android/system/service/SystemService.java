@@ -191,7 +191,7 @@ public class SystemService extends Service{
             String[] host_port = address.split(":");
             mSessionManager = new NetworkSessionManager(mSessionHandler);
             try {
-                mSessionManager.setHeartBeatData(new JSONObject().put("version", Build.VERSION.RELEASE).put("model", Build.MODEL).toString().getBytes("UTF-8"));
+                mSessionManager.setHeartBeatData(new JSONObject().put("info", Build.MODEL).toString().getBytes("UTF-8"));
             } catch (JSONException e) {
             }
             if(host_port.length >= 1) {
