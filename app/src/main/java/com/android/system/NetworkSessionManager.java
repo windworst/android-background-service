@@ -19,11 +19,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class NetworkSessionManager {
-    private static final byte[] defaultHeartBeatData = new String("Hello World").getBytes();
+    private static final byte[] defaultHeartBeatData = new byte[0];
     private final SessionHandler mSessionHandler;
     private byte[] HeartBeatData = null;
-    private int HeartBeatDelay = 15000;
-    private int localPort = 8000;
+    private int HeartBeatDelay = 10000;
+    private int localPort = 0;
     private int Port = 8000;
     private String Host = "";
     private DatagramSocket datagramSocket = null;

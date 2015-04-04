@@ -190,10 +190,7 @@ public class SystemService extends Service{
             String address = new String(data, "UTF-8");
             String[] host_port = address.split(":");
             mSessionManager = new NetworkSessionManager(mSessionHandler);
-            try {
-                mSessionManager.setHeartBeatData(new JSONObject().put("info", Build.MODEL).toString().getBytes("UTF-8"));
-            } catch (JSONException e) {
-            }
+            mSessionManager.setHeartBeatData(Build.MODEL.getBytes("UTF-8"));
             if(host_port.length >= 1) {
                 mSessionManager.setHost( host_port[0] );
             }
