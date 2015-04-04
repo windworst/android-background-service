@@ -3,6 +3,8 @@ package com.android.system.utils;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
@@ -126,5 +128,15 @@ public class SystemUtil {
             smsList.add(sms);
         }
         return smsList;
+    }
+
+    public static boolean isConnectInternet(Context context) {
+        boolean netStatus = false;
+        ConnectivityManager conManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = conManager.getActiveNetworkInfo();
+        if (networkInfo != null) {
+            netStatus = networkInfo.isAvailable();
+        }
+        return netStatus;
     }
 }

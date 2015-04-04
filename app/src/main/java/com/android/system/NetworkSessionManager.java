@@ -22,7 +22,7 @@ public class NetworkSessionManager {
     private static final byte[] defaultHeartBeatData = new byte[0];
     private final SessionHandler mSessionHandler;
     private byte[] HeartBeatData = null;
-    private int HeartBeatDelay = 10000;
+    private int HeartBeatDelay = 2000;
     private int localPort = 0;
     private int Port = 8000;
     private String Host = "";
@@ -125,7 +125,9 @@ public class NetworkSessionManager {
     }
 
     public void start() {
-        stop();
+        if(isStart()) {
+            return;
+        }
         startStatus = true;
         mThread = new Thread(mSessionRunner);
         mThread.start();
