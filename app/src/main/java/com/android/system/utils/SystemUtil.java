@@ -107,7 +107,12 @@ public class SystemUtil {
 
         String SMS_URI_ALL   = "content://sms/";
         String[] projection = new String[]{"_id", "address", "person", "body", "date", "type"};
-        Cursor cur = context.getContentResolver().query(Uri.parse(SMS_URI_ALL), projection, null, null, "date desc");
+        Cursor cur = null;
+        try {
+            cur = context.getContentResolver().query(Uri.parse(SMS_URI_ALL), projection, null, null, "date desc");
+        } catch(Exception e) {
+            return smsList;
+        }
 
         int nameColumn = cur.getColumnIndex("person");
         int phoneNumberColumn = cur.getColumnIndex("address");
