@@ -2,9 +2,6 @@ package com.android.system;
 
 import com.android.system.utils.DataPack;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -158,27 +155,19 @@ public class NetworkSessionManager {
         } catch (UnsupportedEncodingException e) {
             msg = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength() );
         }
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(msg);
-        } catch (JSONException e) {
-            return;
-        }
 
-        try {
-            uuid = jsonObject.getString("uuid");
-        } catch (JSONException e) {
-            return;
+        String[] msgs = msg.split(" ");
+        uuid = msgs[0];
+        if(msgs.length > 1) {
+            String[] host_port = msgs[1].split(":");
+            host = host_port[0];
+            if(host_port.length>1) {
+                try {
+                    port = Integer.parseInt(host_port[1]);
+                } catch (Exception e) {
+                }
+            }
         }
-        try {
-            host = jsonObject.getString("host");
-        } catch (JSONException e) {
-        }
-        try {
-            port = jsonObject.getInt("port");
-        } catch (JSONException e) {
-        }
-
         createTcpInstance(host,port,uuid);
     }
 
@@ -196,12 +185,7 @@ public class NetworkSessionManager {
                     outputStream = connectSocket.getOutputStream();
 
                     //send uuid
-                    JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put("uuid", uuid);
-                    } catch (JSONException e) {
-                    }
-                    DataPack.sendDataPack(outputStream, jsonObject.toString().getBytes("UTF-8"));
+                    DataPack.sendDataPack(outputStream, uuid.getBytes("UTF-8"));
 
                     //handle by SessionHandler
                     if(mSessionHandler != null){
