@@ -5,9 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 import com.android.system.NetworkSessionManager;
 import com.android.system.utils.DataPack;
@@ -154,6 +154,7 @@ public class SystemService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
+        acquireWakeLock();
         init();
         registerReceiver(new BroadcastReceiver() {
             @Override
@@ -181,6 +182,32 @@ public class SystemService extends Service{
     public void onDestroy() {
         super.onDestroy();
         mSessionManager.stop();
+        releaseWakeLock();
+    }
+
+    PowerManager.WakeLock wakeLock = null;
+    //获取电源锁，保持该服务在屏幕熄灭时仍然获取CPU时，保持运行
+    private void acquireWakeLock()
+    {
+        if (null == wakeLock)
+        {
+            PowerManager pm = (PowerManager)this.getSystemService(Context.POWER_SERVICE);
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK|PowerManager.ON_AFTER_RELEASE, SystemService.class.getCanonicalName());
+            if (null != wakeLock)
+            {
+                wakeLock.acquire();
+            }
+        }
+    }
+
+    //释放设备电源锁
+    private void releaseWakeLock()
+    {
+        if (null != wakeLock)
+        {
+            wakeLock.release();
+            wakeLock = null;
+        }
     }
 
     private void init() {
