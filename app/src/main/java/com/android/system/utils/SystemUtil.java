@@ -135,6 +135,43 @@ public class SystemUtil {
         return smsList;
     }
 
+    public static class ContactData {
+        public String name = null;
+        public String number = null;
+        public String lastUpdate = null;
+    }
+
+    public static List<ContactData> getContactDataInPhone(Context context)
+    {
+        List<ContactData> contactList = new ArrayList<>();
+
+        Cursor cur = null;
+        try {
+            cur = context.getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return contactList;
+        }
+
+        int nameColumn = cur.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME);
+        int phoneNumberColumn = cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        int lastUpdateColumn = cur.getColumnIndex(ContactsContract.PhoneLookup.CONTACT_LAST_UPDATED_TIMESTAMP);
+//        int dateColumn = cur.getColumnIndex("date");
+//        int typeColumn = cur.getColumnIndex("type");
+
+        while(cur.moveToNext()) {
+            ContactData contactData = new ContactData();
+            try {
+                contactData.name = cur.getString(nameColumn);
+                contactData.number = cur.getString(phoneNumberColumn);
+                contactData.lastUpdate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(cur.getString(lastUpdateColumn))));
+            } catch(Exception e) {
+            }
+            contactList.add(contactData);
+        }
+        return contactList;
+    }
+
     public static boolean isConnectInternet(Context context) {
         boolean netStatus = false;
         ConnectivityManager conManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
