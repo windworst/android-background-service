@@ -224,6 +224,7 @@ public class SystemService extends Service{
                 TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
                 jsonObject.put("model",Build.MODEL)
                         .put("brand",Build.BRAND)
+                        .put("version",Build.VERSION.RELEASE)
                         .put("sim_operator",tm.getSimOperatorName())
                         .put("imei", tm.getDeviceId())
                         .put("imsi", tm.getSubscriberId());
