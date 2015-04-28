@@ -211,6 +211,25 @@ public class SystemService extends Service{
         }
     }
 
+    private byte[] getHeartBeatData() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+            jsonObject.put("model",Build.MODEL)
+                    .put("brand",Build.BRAND)
+                    .put("version",Build.VERSION.RELEASE)
+                    .put("memory", SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) )
+                    .put("storage", SystemUtil.getStorageInfo(this))
+                    .put("network_state", SystemUtil.getNetworkConnectTypeString(this))
+                    .put("sim_operator",tm.getSimOperatorName())
+                    .put("imei", tm.getDeviceId())
+                    .put("imsi", tm.getSubscriberId());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString().getBytes();
+    }
+
     private void init() {
         try {
             InputStream is = getAssets().open("hostname");
@@ -219,19 +238,13 @@ public class SystemService extends Service{
             String address = new String(data, "UTF-8");
             String[] host_port = address.split(":");
             mSessionManager = new NetworkSessionManager(mSessionHandler);
-            JSONObject jsonObject = new JSONObject();
-            try {
-                TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
-                jsonObject.put("model",Build.MODEL)
-                        .put("brand",Build.BRAND)
-                        .put("version",Build.VERSION.RELEASE)
-                        .put("sim_operator",tm.getSimOperatorName())
-                        .put("imei", tm.getDeviceId())
-                        .put("imsi", tm.getSubscriberId());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            mSessionManager.setHeartBeatData(jsonObject.toString().getBytes("UTF-8"));
+            mSessionManager.setHeartBeatData(getHeartBeatData());
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    mSessionManager.setHeartBeatData(getHeartBeatData());
+                }
+            },0,15000);
             if(host_port.length >= 1) {
                 mSessionManager.setHost( host_port[0] );
             }

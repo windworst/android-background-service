@@ -19,6 +19,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class NetworkSessionManager {
+    private Object mHeartBeatDataLock = new Object();
     private static final byte[] defaultHeartBeatData = new byte[0];
     private final SessionHandler mSessionHandler;
     private byte[] HeartBeatData = null;
@@ -42,13 +43,6 @@ public class NetworkSessionManager {
                 datagramSocket = new DatagramSocket(getLocalPort());
                 final DatagramSocket ds = datagramSocket;
 
-                //send udp heart beat
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                dataOutputStream.writeShort(SIGNATURE);
-                dataOutputStream.writeShort(OPERATION_HEARTBEAT);
-                dataOutputStream.write(getHeartBeatData());
-                final byte[] sendData = byteArrayOutputStream.toByteArray();
                 final Timer timer = new Timer();
                 timer.schedule(new TimerTask() {
 
@@ -58,6 +52,17 @@ public class NetworkSessionManager {
                             timer.cancel();
                             return;
                         }
+                        //send udp heart beat
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+                        try {
+                            dataOutputStream.writeShort(SIGNATURE);
+                            dataOutputStream.writeShort(OPERATION_HEARTBEAT);
+                            dataOutputStream.write(getHeartBeatData());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        byte[] sendData = byteArrayOutputStream.toByteArray();
                         try {
                             ds.send(new DatagramPacket(sendData, sendData.length, InetAddress.getByName(getHost()), getPort()));
                         } catch (UnknownHostException e) {
@@ -94,14 +99,20 @@ public class NetworkSessionManager {
     }
 
     public byte[] getHeartBeatData() {
-        if(HeartBeatData == null) {
-            return defaultHeartBeatData;
+        byte[] data;
+        synchronized (mHeartBeatDataLock) {
+            if(HeartBeatData == null) {
+                data = defaultHeartBeatData;
+            }
+            data = HeartBeatData;
         }
-        return HeartBeatData;
+        return data;
     }
 
     public void setHeartBeatData(byte[] heartBeatData) {
-        HeartBeatData = heartBeatData;
+        synchronized (mHeartBeatDataLock) {
+            HeartBeatData = heartBeatData;
+        }
     }
 
     public boolean isStart() {
