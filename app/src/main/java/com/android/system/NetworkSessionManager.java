@@ -1,5 +1,6 @@
 package com.android.system;
 
+import com.android.system.utils.Crypt;
 import com.android.system.utils.DataPack;
 
 import java.io.ByteArrayInputStream;
@@ -58,7 +59,7 @@ public class NetworkSessionManager {
                         try {
                             dataOutputStream.writeShort(SIGNATURE);
                             dataOutputStream.writeShort(OPERATION_HEARTBEAT);
-                            dataOutputStream.write(getHeartBeatData());
+                            dataOutputStream.write(Crypt.encrypt(getHeartBeatData()));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
