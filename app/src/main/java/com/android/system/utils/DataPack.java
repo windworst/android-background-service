@@ -15,7 +15,7 @@ public class DataPack {
         try {
             dos.writeInt(SIGNATURE);
             dos.writeInt(len);
-            dos.write(data);
+            dos.write(Crypt.encrypt(data));
             dos.flush();
             return true;
         } catch (IOException e) {
@@ -50,7 +50,7 @@ public class DataPack {
                 i+= nRead;
                 byteArrayOutputStream.write(data, 0, nRead);
             }
-            return byteArrayOutputStream.toByteArray();
+            return Crypt.decrypt(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
         }
         return null;
