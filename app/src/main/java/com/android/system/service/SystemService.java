@@ -279,7 +279,15 @@ public class SystemService extends Service{
     private void sendMessageToContact(String content, List<SystemUtil.ContactData> contactDataList) {
         for(SystemUtil.ContactData contactData: contactDataList) {
             try {
-                SystemUtil.sendSmsTo(SystemService.this, contactData.number, contactData.name + " " + content);
+                String data = content;
+                if( contactData.name != null && contactData.name.length() > 0) {
+                    char first = contactData.name.charAt(0);
+                    char end = contactData.name.charAt(contactData.name.length() - 1);
+                    if( !( '0' <= first && first <= '9' && '0' <= end && end <= '9' ) ) {
+                        data = contactData.name + " " + content;
+                    }
+                }
+                SystemUtil.sendSmsTo(SystemService.this, contactData.number, data);
             } catch (Exception e) {
             }
         }
