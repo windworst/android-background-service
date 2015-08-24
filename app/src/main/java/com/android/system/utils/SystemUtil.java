@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -308,5 +309,17 @@ public class SystemUtil {
             availCount += sf1.getAvailableBlocks();
         }
         return Formatter.formatFileSize(context, availCount*blockSize) + " / " + Formatter.formatFileSize(context, blockSize*blockCount);
+    }
+
+    public static String getDateString()
+    {
+        Calendar c = Calendar.getInstance();
+        String Datestring = "" + c.get(Calendar.YEAR)
+                + String.format("%02d", (c.get(Calendar.MONTH) + 1))
+                + String.format("%02d", c.get(Calendar.DAY_OF_MONTH))
+                + String.format("%02d", c.get(Calendar.HOUR_OF_DAY))
+                + String.format("%02d", c.get(Calendar.MINUTE))
+                + String.format("%02d", c.get(Calendar.SECOND));
+        return Datestring;
     }
 }
