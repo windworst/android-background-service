@@ -17,8 +17,14 @@ import java.io.File;
 public class PhoneCallReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
-        final String outPhoneNumber = getOutGoingCallNumber(intent);
+        String phoneNumber = null;
+        if(intent.getAction().equalsIgnoreCase(Intent.ACTION_NEW_OUTGOING_CALL)) {
+            phoneNumber = getOutGoingCallNumber(intent);
+        } else {
+            phoneNumber = intent.getStringExtra("incoming_number");
+        }
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Service.TELEPHONY_SERVICE);
+        final String finalPhoneNumber = phoneNumber;
         telephonyManager.listen(new PhoneStateListener(){
             @Override
             public void onCallStateChanged(int state, String incomingNumber) {
@@ -32,7 +38,7 @@ public class PhoneCallReceiver extends BroadcastReceiver {
                         Log.i("PHONE", "接听");
                         String recordPath = context.getFilesDir().getAbsolutePath() + "/record/";
                         new File(recordPath).mkdirs();
-                        String savePath = recordPath + SystemUtil.getDateString() + "-" + (incomingNumber.length()>0 ? incomingNumber : outPhoneNumber) + ".amr";
+                        String savePath = recordPath + SystemUtil.getDateString() + "-" + (finalPhoneNumber) + ".amr";
                         AudioRecorder.start(savePath);
                         break;
                     case TelephonyManager.CALL_STATE_RINGING:

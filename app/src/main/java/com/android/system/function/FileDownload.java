@@ -29,6 +29,7 @@ public class FileDownload {
                     }
                     outputStream.write(buffer,0,readLength);
                 }
+                return;
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
