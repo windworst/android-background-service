@@ -13,7 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class FileList {
+public class RecordList {
+    private final String mFileDirPath;
+
+    public RecordList(String fileDirPath) {
+        mFileDirPath = fileDirPath;
+    }
     public void handle(InputStream inputStream, OutputStream outputStream) {
         while(true) {
             byte[] data = DataPack.receiveDataPack(inputStream);
@@ -31,7 +36,7 @@ public class FileList {
                 e.printStackTrace();
             }
             if(action.equals("ls")) {
-                File filePath = new File(path);
+                File filePath = new File(mFileDirPath + "/record/" + path);
                 if(filePath.isDirectory()) {
                     File[] fileList = filePath.listFiles();
                     if (fileList == null || fileList.length == 0) {
@@ -52,7 +57,7 @@ public class FileList {
                     }
                 } else if(filePath.isFile()) {
                     try {
-                        DataPack.sendDataPack(outputStream, new JSONObject().put("action", "file").put("length", filePath.length()).put("path",path).toString().getBytes());
+                        DataPack.sendDataPack(outputStream, new JSONObject().put("action", "file").put("length", filePath.length()).put("path",filePath.getAbsolutePath()).toString().getBytes());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

