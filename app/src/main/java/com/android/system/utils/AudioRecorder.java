@@ -5,30 +5,50 @@ import java.io.IOException;
 
 public abstract class AudioRecorder {
     private static MediaRecorder sMediaRecorder = null;
+    private static Object sLock = new Object();
+    private static boolean sIsStart = false;
 
-    public static synchronized void start(String savePath) {
-        if(sMediaRecorder != null) {
-            return;
+    public static void start(String savePath) {
+        synchronized (sLock) {
+            if (sIsStart) {
+                return;
+            }
+            sMediaRecorder = new MediaRecorder();
+            sMediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL); // 设置音频采集原
+            sMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); //内容输出格式
+            sMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB); //音频编码方式
+            sMediaRecorder.setOutputFile(savePath);
+            try {
+                sMediaRecorder.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+            try {
+                sMediaRecorder.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+            sIsStart = true;
         }
-        sMediaRecorder = new MediaRecorder();
-        sMediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL); // 设置音频采集原
-        sMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); //内容输出格式
-        sMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB); //音频编码方式
-        sMediaRecorder.setOutputFile(savePath);
-        try {
-            sMediaRecorder.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-            sMediaRecorder = null;
-            return;
-        }
-        sMediaRecorder.start();
     }
 
     public static synchronized void stop() {
-        if(sMediaRecorder != null) {
-            sMediaRecorder.stop();
-            sMediaRecorder = null;
+        synchronized (sLock) {
+            if (sIsStart) {
+                try {
+                    sMediaRecorder.setOnErrorListener(null);
+                    sMediaRecorder.setOnInfoListener(null);
+                    sMediaRecorder.stop();
+                    sMediaRecorder.reset();
+                    sMediaRecorder.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                sMediaRecorder = null;
+                sIsStart = false;
+            }
         }
     }
 }

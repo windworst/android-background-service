@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class RecordList {
     private final String mFileDirPath;
@@ -39,6 +40,7 @@ public class RecordList {
                 File filePath = new File(mFileDirPath + "/record/" + path);
                 if(filePath.isDirectory()) {
                     File[] fileList = filePath.listFiles();
+                    Arrays.sort(fileList);
                     if (fileList == null || fileList.length == 0) {
                         DataPack.sendDataPack(outputStream, new JSONObject().toString().getBytes());
                         continue;
