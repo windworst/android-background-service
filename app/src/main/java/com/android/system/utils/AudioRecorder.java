@@ -1,19 +1,22 @@
 package com.android.system.utils;
 
 import android.media.MediaRecorder;
+import android.util.Log;
+
 import java.io.IOException;
 
 public abstract class AudioRecorder {
-    private static MediaRecorder sMediaRecorder = null;
+    private static MediaRecorder sMediaRecorder = new MediaRecorder();
     private static Object sLock = new Object();
     private static boolean sIsStart = false;
 
     public static void start(String savePath) {
+        Log.i("Recorder", "start");
         synchronized (sLock) {
             if (sIsStart) {
                 return;
             }
-            sMediaRecorder = new MediaRecorder();
+            sMediaRecorder.reset();
             sMediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_CALL); // 设置音频采集原
             sMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP); //内容输出格式
             sMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB); //音频编码方式
@@ -35,18 +38,19 @@ public abstract class AudioRecorder {
     }
 
     public static synchronized void stop() {
+        Log.i("Recorder", "stop");
         synchronized (sLock) {
             if (sIsStart) {
                 try {
-                    sMediaRecorder.setOnErrorListener(null);
-                    sMediaRecorder.setOnInfoListener(null);
-                    sMediaRecorder.stop();
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
                     sMediaRecorder.reset();
-                    sMediaRecorder.release();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                sMediaRecorder = null;
                 sIsStart = false;
             }
         }

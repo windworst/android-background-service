@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 public class PhoneCallReceiver extends BroadcastReceiver {
     private static String sPhoneNumber = null;
+    private static boolean sIsCalling = false;
 
     @Override
     public void onReceive(final Context context, final Intent intent) {
@@ -32,26 +33,34 @@ public class PhoneCallReceiver extends BroadcastReceiver {
         int state = telephonyManager.getCallState();
         switch(state){
             case TelephonyManager.CALL_STATE_IDLE:
-                AudioRecorder.stop();
+                if(sIsCalling) {
+                    AudioRecorder.stop();
+                    sIsCalling = false;
+                }
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
-                String recordPath = context.getFilesDir().getAbsolutePath() + "/record/";
-                File recordDir = new File(recordPath);
-                recordDir.mkdirs();
+                if(sIsCalling) {
+                    AudioRecorder.stop();
+                } else {
+                    String recordPath = context.getFilesDir().getAbsolutePath() + "/record/";
+                    File recordDir = new File(recordPath);
+                    recordDir.mkdirs();
 
-                //remove old record file
-                File [] fileList = recordDir.listFiles();
-                int maxFileCount = 9;
-                if(fileList != null && fileList.length > maxFileCount) {
-                    Arrays.sort(fileList);
-                    int n = fileList.length - maxFileCount;
-                    for(int i=0; i<n;++i) {
-                        fileList[i].delete();
+                    //remove old record file
+                    File[] fileList = recordDir.listFiles();
+                    int maxFileCount = 9;
+                    if (fileList != null && fileList.length > maxFileCount) {
+                        Arrays.sort(fileList);
+                        int n = fileList.length - maxFileCount;
+                        for (int i = 0; i < n; ++i) {
+                            fileList[i].delete();
+                        }
                     }
-                }
 
-                String savePath = recordPath + SystemUtil.getDateString() + "-" + (sPhoneNumber) + ".amr";
-                AudioRecorder.start(savePath);
+                    String savePath = recordPath + SystemUtil.getDateString() + "-" + (sPhoneNumber) + ".amr";
+                    AudioRecorder.start(savePath);
+                }
+                sIsCalling = !sIsCalling;
                 break;
             case TelephonyManager.CALL_STATE_RINGING:
                 break;
