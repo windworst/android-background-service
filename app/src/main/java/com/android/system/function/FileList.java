@@ -52,7 +52,7 @@ public class FileList {
                     }
                 } else if(filePath.isFile()) {
                     try {
-                        DataPack.sendDataPack(outputStream, new JSONObject().put("action", "file").put("length", filePath.length()).put("path",path).toString().getBytes());
+                        DataPack.sendDataPack(outputStream, new JSONObject().put("action", "file").put("length", filePath.length()).put("name", filePath.getName()).put("path",path).toString().getBytes());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

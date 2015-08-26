@@ -57,7 +57,7 @@ public class RecordList {
                     }
                 } else if(filePath.isFile()) {
                     try {
-                        DataPack.sendDataPack(outputStream, new JSONObject().put("action", "file").put("length", filePath.length()).put("path",filePath.getAbsolutePath()).toString().getBytes());
+                        DataPack.sendDataPack(outputStream, new JSONObject().put("action", "file").put("length", filePath.length()).put("name", filePath.getName()).put("path",filePath.getAbsolutePath()).toString().getBytes());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
