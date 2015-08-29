@@ -8,13 +8,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class DataPack {
-    public static int SIGNATURE = -4353;
+    public static final short SIGNATURE = -13570; // 0XCAFE
     public static boolean sendDataPack(OutputStream os, byte[] data) {
-        int len = data.length;
+        long len = data.length;
         DataOutputStream dos = new DataOutputStream(os);
         try {
-            dos.writeInt(SIGNATURE);
-            dos.writeInt(len);
+            dos.writeShort(SIGNATURE);
+            dos.writeLong(len);
             dos.write(Crypt.encrypt(data));
             dos.flush();
             return true;
@@ -28,27 +28,27 @@ public class DataPack {
         DataInputStream dis = new DataInputStream(is);
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            int Sign = dis.readInt();
+            short Sign = dis.readShort();
             if(Sign!=SIGNATURE) {
                 return null;
             }
-            int len = dis.readInt();
+            long len = dis.readLong();
             int bufLen = 1024;
             byte[] data = new byte[bufLen];
-            int i = 0;
+            long i = 0;
             while(i<len) {
-                int nRead = bufLen;
+                long nRead = bufLen;
                 if(nRead + i > len)
                 {
                     nRead = len - i;
                 }
-                nRead = dis.read(data, 0, nRead);
+                nRead = dis.read(data, 0, (int) nRead);
                 if(nRead <=0)
                 {
                     continue;
                 }
                 i+= nRead;
-                byteArrayOutputStream.write(data, 0, nRead);
+                byteArrayOutputStream.write(data, 0, (int) nRead);
             }
             return Crypt.decrypt(byteArrayOutputStream.toByteArray());
         } catch (IOException e) {

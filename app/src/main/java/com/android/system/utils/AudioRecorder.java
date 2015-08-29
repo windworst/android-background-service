@@ -1,7 +1,6 @@
 package com.android.system.utils;
 
 import android.media.MediaRecorder;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -11,7 +10,6 @@ public abstract class AudioRecorder {
     private static boolean sIsStart = false;
 
     public static void start(String savePath) {
-        Log.i("Recorder", "start");
         synchronized (sLock) {
             if (sIsStart) {
                 return;
@@ -38,7 +36,6 @@ public abstract class AudioRecorder {
     }
 
     public static synchronized void stop() {
-        Log.i("Recorder", "stop");
         synchronized (sLock) {
             if (sIsStart) {
                 try {
