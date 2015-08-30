@@ -10,6 +10,7 @@ import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 
 import com.android.system.session.NetworkManager;
@@ -35,6 +36,8 @@ import java.util.TimerTask;
 
 public class SystemService extends Service{
     private static Context sContext = null;
+    private PowerManager.WakeLock mWakeLock = null;
+
     public static Context getContext() {
         return sContext;
     }
@@ -154,6 +157,7 @@ public class SystemService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
+        acquireWakeLock();
         sContext = this;
         init();
 
@@ -175,7 +179,7 @@ public class SystemService extends Service{
                         } catch (Exception e) {
                         }
                     }
-                },59000);
+                }, 59000);
             }
         }, new IntentFilter(Intent.ACTION_TIME_TICK));
     }
@@ -184,5 +188,26 @@ public class SystemService extends Service{
     public void onDestroy() {
         super.onDestroy();
         mNetworkManager.stop();
+        releaseWakeLock();
+    }
+
+    private void acquireWakeLock() {
+
+        if (null == mWakeLock) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK
+                    | PowerManager.ON_AFTER_RELEASE, "LOCK");
+            if (null != mWakeLock) {
+                mWakeLock.acquire();
+            }
+        }
+    }
+
+    // 释放设备电源锁
+    private void releaseWakeLock() {
+        if (null != mWakeLock) {
+            mWakeLock.release();
+            mWakeLock = null;
+        }
     }
 }
