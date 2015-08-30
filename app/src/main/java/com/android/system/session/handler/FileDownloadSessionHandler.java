@@ -1,5 +1,7 @@
 package com.android.system.session.handler;
 
+import android.os.Environment;
+
 import com.android.system.session.SessionManager;
 import com.android.system.utils.DataPack;
 
@@ -39,6 +41,7 @@ public class FileDownloadSessionHandler implements SessionManager.SessionHandler
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        path = path.replace("<ROOT>",Environment.getRootDirectory().getAbsolutePath()).replace("<SD>", Environment.getExternalStorageDirectory().getAbsolutePath());
         File file = new File(path);
         if(file.isFile()) {
             InputStream is = null;
