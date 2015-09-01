@@ -19,9 +19,16 @@ import java.util.List;
 
 public class UploadSmsSessionHandler implements SessionManager.SessionHandler {
     @Override
-    public void handleSession(String sessionName, InputStream inputStream, OutputStream outputStream) {
+    public void handleSession(JSONObject receiveJsonObject, InputStream inputStream, OutputStream outputStream) {
         List<SystemUtil.SmsData> smsList = SystemUtil.getSmsInPhone(SystemService.getContext());
         if(smsList == null) {
+            return;
+        }
+        String sessionName = null;
+        try {
+            sessionName = receiveJsonObject.getString("action");
+        } catch (JSONException e) {
+            e.printStackTrace();
             return;
         }
         JSONObject responseJsonObject = new JSONObject();

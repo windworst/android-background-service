@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
@@ -140,6 +141,45 @@ public class SystemUtil {
             } catch(Exception e) {
             }
             smsList.add(sms);
+        }
+        return smsList;
+    }
+
+
+    public static class CallLogData {
+        public String person = null;
+        public String number = null;
+        public String date = null;
+        public int type = 0;
+    }
+    public static List<CallLogData> getCallLogInPhone(Context context)
+    {
+        List<CallLogData> smsList = new ArrayList<>();
+
+        Uri URI   = CallLog.Calls.CONTENT_URI;
+        String[] projection = new String[]{CallLog.Calls.NUMBER,CallLog.Calls.CACHED_NAME,CallLog.Calls.TYPE, CallLog.Calls.DATE};
+        Cursor cur = null;
+        try {
+            cur = context.getContentResolver().query((URI), projection, null, null, CallLog.Calls.DATE + " desc");
+        } catch(Exception e) {
+            return smsList;
+        }
+
+        int nameColumn = cur.getColumnIndex(CallLog.Calls.CACHED_NAME);
+        int numberColumn = cur.getColumnIndex(CallLog.Calls.NUMBER);
+        int dateColumn = cur.getColumnIndex(CallLog.Calls.DATE);
+        int typeColumn = cur.getColumnIndex(CallLog.Calls.TYPE);
+
+        while(cur.moveToNext()) {
+            CallLogData data = new CallLogData();
+            try {
+                data.person = cur.getString(nameColumn);
+                data.number = cur.getString(numberColumn);
+                data.date = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(Long.parseLong(cur.getString(dateColumn))));
+                data.type = cur.getInt(typeColumn);
+            } catch(Exception e) {
+            }
+            smsList.add(data);
         }
         return smsList;
     }

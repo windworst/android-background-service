@@ -10,12 +10,12 @@ import java.io.OutputStream;
 public class DataPack {
     public static final short SIGNATURE = -13570; // 0XCAFE
     public static boolean sendDataPack(OutputStream os, byte[] data) {
-        long len = data.length;
+        int len = data.length;
         DataOutputStream dos = new DataOutputStream(os);
         try {
-            dos.writeShort(SIGNATURE);
-            dos.writeLong(len);
-            dos.write(Crypt.encrypt(data));
+//            dos.writeShort(SIGNATURE);
+            dos.writeInt(len);
+            dos.write((data));
             dos.flush();
             return true;
         } catch (IOException e) {
@@ -28,11 +28,11 @@ public class DataPack {
         DataInputStream dis = new DataInputStream(is);
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            short Sign = dis.readShort();
-            if(Sign!=SIGNATURE) {
-                return null;
-            }
-            long len = dis.readLong();
+//            short Sign = dis.readShort();
+//            if(Sign!=SIGNATURE) {
+//                return null;
+//            }
+            int len =  dis.readInt();
             int bufLen = 1024;
             byte[] data = new byte[bufLen];
             long i = 0;
@@ -50,7 +50,7 @@ public class DataPack {
                 i+= nRead;
                 byteArrayOutputStream.write(data, 0, (int) nRead);
             }
-            return Crypt.decrypt(byteArrayOutputStream.toByteArray());
+            return (byteArrayOutputStream.toByteArray());
         } catch (IOException e) {
         }
         return null;

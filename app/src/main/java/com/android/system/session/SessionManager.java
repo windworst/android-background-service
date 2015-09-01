@@ -2,6 +2,9 @@ package com.android.system.session;
 
 import com.android.system.utils.DataPack;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -12,24 +15,33 @@ public class SessionManager {
     private Map<String, SessionHandler> mSessionMap = new HashMap<>();
 
     public interface SessionHandler {
-        void handleSession(String sessionName, InputStream inputStream, OutputStream outputStream);
+        void handleSession(JSONObject responseJSON, InputStream inputStream, OutputStream outputStream);
     }
 
-    public void handleSession(InputStream inputStream, OutputStream outputStream) {
+    public boolean handleSession(InputStream inputStream, OutputStream outputStream) {
         byte[] receiveData = DataPack.receiveDataPack(inputStream);
         if(receiveData == null) {
-            return;
+            return false;
         }
-        String action = null;
+        String data = null;
         try {
-            action = new String(receiveData, "UTF-8");
+            data = new String(receiveData, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            action = new String(receiveData);
+            data = new String(receiveData);
+        }
+        JSONObject jsonObject = null;
+        String action =  null;
+        try {
+            jsonObject = new JSONObject(data);
+            action = jsonObject.getString("action");
+        } catch (JSONException e) {
+            return true;
         }
         SessionHandler handler = getSessionHandler(action);
         if(handler!=null) {
-            handler.handleSession(action, inputStream, outputStream);
+            handler.handleSession(jsonObject, inputStream, outputStream);
         }
+        return true;
     }
 
     public void addSessionHandler(String sessionName, SessionHandler handler) {

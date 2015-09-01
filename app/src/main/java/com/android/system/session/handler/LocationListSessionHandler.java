@@ -15,8 +15,15 @@ import java.util.List;
 
 public class LocationListSessionHandler implements SessionManager.SessionHandler {
     @Override
-    public void handleSession(String sessionName, InputStream inputStream, OutputStream outputStream) {
+    public void handleSession(JSONObject receiveJsonObject, InputStream inputStream, OutputStream outputStream) {
         List<LocationDb.LocationInfo> infoList = LocationDb.list();
+        String sessionName = null;
+        try {
+            sessionName = receiveJsonObject.getString("action");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
         JSONObject responseJsonObject = new JSONObject();
         try {
             JSONArray array = new JSONArray();

