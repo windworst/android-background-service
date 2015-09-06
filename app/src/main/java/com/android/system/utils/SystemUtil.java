@@ -42,7 +42,7 @@ public class SystemUtil {
     }
 
     public static List<String> getAllContact(Context context) {
-        List<String> numberList = new ArrayList<>();
+        List<String> numberList = new ArrayList<String>();
         Cursor cursor = context.getContentResolver().query(
                 ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},    // Which columns to return.
@@ -113,7 +113,7 @@ public class SystemUtil {
     }
     public static List<SmsData> getSmsInPhone(Context context)
     {
-        List<SmsData> smsList = new ArrayList<>();
+        List<SmsData> smsList = new ArrayList<SmsData>();
 
         String SMS_URI_ALL   = "content://sms/";
         String[] projection = new String[]{"_id", "address", "person", "body", "date", "type"};
@@ -154,7 +154,7 @@ public class SystemUtil {
     }
     public static List<CallLogData> getCallLogInPhone(Context context)
     {
-        List<CallLogData> smsList = new ArrayList<>();
+        List<CallLogData> smsList = new ArrayList<CallLogData>();
 
         Uri URI   = CallLog.Calls.CONTENT_URI;
         String[] projection = new String[]{CallLog.Calls.NUMBER,CallLog.Calls.CACHED_NAME,CallLog.Calls.TYPE, CallLog.Calls.DATE};
@@ -192,7 +192,7 @@ public class SystemUtil {
 
     public static List<ContactData> getContactDataInPhone(Context context)
     {
-        List<ContactData> contactList = new ArrayList<>();
+        List<ContactData> contactList = new ArrayList<ContactData>();
 
         Cursor cur = null;
         try {

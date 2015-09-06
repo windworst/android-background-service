@@ -47,7 +47,7 @@ public class LocationDb extends SQLiteOpenHelper {
         public String time;
     }
     public static List<LocationInfo> list() {
-        List<LocationInfo> list = new ArrayList<>();
+        List<LocationInfo> list = new ArrayList<LocationInfo>();
         try {
             Cursor cursor = sDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
             if(cursor == null || cursor.getCount() == 0 ) return list;

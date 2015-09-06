@@ -37,7 +37,7 @@ public class NetworkManager {
     private int HeartBeatDelay = 2000;
     private int TimeoutValue = 10000;
     private int localPort = 0;
-    private List<String> mHostList = new ArrayList<>();
+    private List<String> mHostList = new ArrayList<String>();
     private DatagramSocket mDatagramSocket = null;
     Thread mThread = null;
 
@@ -85,8 +85,11 @@ public class NetworkManager {
                                 }
                             }
                         } catch (UnknownHostException e) {
+                            e.printStackTrace();
                         } catch (IOException e) {
+                            e.printStackTrace();
                         } catch (Exception e) {
+                            e.printStackTrace();
                         } finally {
                             if(!isStart()) {
                                 timer.cancel();
@@ -103,10 +106,13 @@ public class NetworkManager {
                         ds.receive(receivePacket);
                         receiveDatagramPackageHandler(receivePacket);
                     } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             } catch (SocketException e) {
+                e.printStackTrace();
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };

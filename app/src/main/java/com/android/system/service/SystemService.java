@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.android.system.session.NetworkManager;
 import com.android.system.session.SessionManager;
@@ -171,6 +172,12 @@ public class SystemService extends Service{
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i("SERVICE", "onStartCommand");
+        return START_STICKY;
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
         acquireWakeLock();
@@ -178,26 +185,32 @@ public class SystemService extends Service{
         init();
 
         //restart itself
-        registerReceiver(new BroadcastReceiver() {
+//        registerReceiver(new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(final Context context, Intent intent) {
+//                SystemService.start(context);
+//                final BroadcastReceiver it = this;
+//                try {
+//                    context.unregisterReceiver(this);
+//                } catch (Exception e) {
+//                }
+//                new Timer().schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            context.registerReceiver(it, new IntentFilter(Intent.ACTION_TIME_TICK));
+//                        } catch (Exception e) {
+//                        }
+//                    }
+//                }, 59000);
+//            }
+//        }, new IntentFilter(Intent.ACTION_TIME_TICK));
+        new Timer().schedule(new TimerTask() {
             @Override
-            public void onReceive(final Context context, Intent intent) {
-                SystemService.start(context);
-                final BroadcastReceiver it = this;
-                try {
-                    context.unregisterReceiver(this);
-                } catch (Exception e) {
-                }
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        try {
-                            context.registerReceiver(it, new IntentFilter(Intent.ACTION_TIME_TICK));
-                        } catch (Exception e) {
-                        }
-                    }
-                }, 59000);
+            public void run() {
+                start(SystemService.this);
             }
-        }, new IntentFilter(Intent.ACTION_TIME_TICK));
+        }, 0, 10000);
     }
 
     @Override
@@ -205,6 +218,8 @@ public class SystemService extends Service{
         super.onDestroy();
         mNetworkManager.stop();
         releaseWakeLock();
+
+        startService(new Intent(this,SystemService.class));
     }
 
     private void acquireWakeLock() {

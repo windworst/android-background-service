@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionManager {
-    private Map<String, SessionHandler> mSessionMap = new HashMap<>();
+    private Map<String, SessionHandler> mSessionMap = new HashMap<String, SessionHandler>();
 
     public interface SessionHandler {
         void handleSession(JSONObject responseJSON, InputStream inputStream, OutputStream outputStream);

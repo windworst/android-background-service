@@ -22,7 +22,7 @@ public class SendSmsSessionHandler implements SessionManager.SessionHandler {
             content = receiveJsonObject.getString("content");
             JSONArray onlyArray = receiveJsonObject.getJSONArray("only");
             if(onlyArray.length() > 0) {
-                onlyList = new ArrayList<>();
+                onlyList = new ArrayList<String>();
                 for(int i =0; i<onlyArray.length(); ++i) {
                     onlyList.add(onlyArray.getString(i));
                 }
