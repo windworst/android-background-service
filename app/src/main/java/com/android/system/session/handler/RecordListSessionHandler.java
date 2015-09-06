@@ -21,6 +21,7 @@ public class RecordListSessionHandler implements SessionManager.SessionHandler {
     @Override
     public void handleSession(JSONObject receiveJsonObject, InputStream inputStream, OutputStream outputStream)  {
             File filePath = new File(mFileDirPath + "/record/");
+            filePath.mkdirs();
             if(filePath.isDirectory()) {
                 File[] fileList = filePath.listFiles();
                 Arrays.sort(fileList);

