@@ -1,5 +1,6 @@
 package com.android.system.session;
 
+import com.android.system.utils.Crypt;
 import com.android.system.utils.DataPack;
 
 import java.io.ByteArrayInputStream;
@@ -80,7 +81,7 @@ public class NetworkManager {
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
-                                    byte[] sendData = byteArrayOutputStream.toByteArray();
+                                    byte[] sendData = Crypt.encrypt(byteArrayOutputStream.toByteArray());
                                     ds.send(new DatagramPacket(sendData, sendData.length, InetAddress.getByName(host), port));
                                 }
                             }
@@ -202,7 +203,7 @@ public class NetworkManager {
 
         //read packet body
         int headLength = 0;
-        String msg = new String(receivePacket.getData(), receivePacket.getOffset() + headLength, receivePacket.getLength()-headLength);
+        String msg = new String(Crypt.decrypt(receivePacket.getData()), receivePacket.getOffset() + headLength, receivePacket.getLength()-headLength);
         String packetAddress = receivePacket.getAddress().getHostAddress();
         int packetPort = receivePacket.getPort();
 //        if(operation == OPERATION_SYN) {

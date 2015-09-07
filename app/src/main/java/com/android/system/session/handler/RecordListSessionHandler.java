@@ -49,6 +49,8 @@ public class RecordListSessionHandler implements SessionManager.SessionHandler {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            } else {
+                DataPack.sendDataPack(outputStream, new JSONObject().toString().getBytes());
             }
     }
 }
