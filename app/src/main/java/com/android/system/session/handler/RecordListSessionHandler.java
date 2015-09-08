@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
 public class RecordListSessionHandler implements SessionManager.SessionHandler {
@@ -38,7 +39,12 @@ public class RecordListSessionHandler implements SessionManager.SessionHandler {
                         jsonObject.put("type", file.isDirectory() ? 1 : 0);
                         jsonArray.put(jsonObject);
                     }
-                    DataPack.sendDataPack(outputStream, new JSONObject().put("record_list", jsonArray).toString().getBytes());
+                    try {
+                        DataPack.sendDataPack(outputStream, new JSONObject().put("record_list", jsonArray).toString().getBytes("UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                        DataPack.sendDataPack(outputStream, new JSONObject().put("record_list", jsonArray).toString().getBytes());
+                    }
                 } catch (JSONException e) {
 
                 }

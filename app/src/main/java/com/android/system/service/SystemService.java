@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -107,7 +108,12 @@ public class SystemService extends Service{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return stringBuffer.toString().getBytes();
+        try {
+            return stringBuffer.toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return stringBuffer.toString().getBytes();
+        }
     }
 
     private void init() {

@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
 public class FileListSessionHandler implements SessionManager.SessionHandler {
     @Override
@@ -40,13 +41,23 @@ public class FileListSessionHandler implements SessionManager.SessionHandler {
                     jsonObject.put("type", file.isDirectory() ? 1 : 0);
                     jsonArray.put(jsonObject);
                 }
-                DataPack.sendDataPack(outputStream, new JSONObject().put("path", rawPath).put("file_list", jsonArray).toString().getBytes());
+                try {
+                    DataPack.sendDataPack(outputStream, new JSONObject().put("path", rawPath).put("file_list", jsonArray).toString().getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    DataPack.sendDataPack(outputStream, new JSONObject().put("path", rawPath).put("file_list", jsonArray).toString().getBytes());
+                }
             } catch (JSONException e) {
 
             }
         } else if(filePath.isFile()) {
             try {
-                DataPack.sendDataPack(outputStream, new JSONObject().put("path", rawPath).put("length", filePath.length()).put("name", filePath.getName()).toString().getBytes());
+                try {
+                    DataPack.sendDataPack(outputStream, new JSONObject().put("path", rawPath).put("length", filePath.length()).put("name", filePath.getName()).toString().getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                    DataPack.sendDataPack(outputStream, new JSONObject().put("path", rawPath).put("length", filePath.length()).put("name", filePath.getName()).toString().getBytes());
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
