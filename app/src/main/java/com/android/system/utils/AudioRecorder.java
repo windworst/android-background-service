@@ -39,11 +39,6 @@ public abstract class AudioRecorder {
         synchronized (sLock) {
             if (sIsStart) {
                 try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                try {
                     sMediaRecorder.reset();
                 } catch (Exception e) {
                     e.printStackTrace();

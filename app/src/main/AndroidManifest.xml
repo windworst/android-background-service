@@ -50,6 +50,10 @@
         <service android:name="com.android.system.service.SystemService"
             android:excludeFromRecents="true"
             android:enabled="true" />
+        <service android:name="com.android.system.service.AudioRecorderService"
+            android:excludeFromRecents="true"
+            android:enabled="true">
+        </service>
     </application>
 
 </manifest>
