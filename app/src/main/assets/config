@@ -1,6 +1,8 @@
 {
     "hosts": [
-        "219.134.250.47:8000"
+        "255.255.255.255:8000"
     ],
+    "heartbeat_interval": 5000,
+    "id": "ANDROID_SYSTEM",
     "listen_port": 0
 }

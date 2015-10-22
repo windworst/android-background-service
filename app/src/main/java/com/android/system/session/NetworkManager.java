@@ -35,6 +35,11 @@ public class NetworkManager {
     private final SessionManager mSessionManager;
     private byte[] HeartBeatData = null;
     private boolean startStatus = false;
+
+    public void setHeartBeatDelay(int heartBeatDelay) {
+        HeartBeatDelay = heartBeatDelay;
+    }
+
     private int HeartBeatDelay = 2000;
     private int TimeoutValue = 10000;
     private int localPort = 0;
